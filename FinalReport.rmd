@@ -19,14 +19,14 @@ GSS <- droplevels(GSS)
 
 <!--In this section you explain what you are trying to show.  Where did the data come from?  What is the research or other question you are trying to answer?.  If you skimp in this section expect to be marked down in your grade. Paint a picture of the project a couple of paragraphs is expected!-->
 
-Is attitude toward capitol punishment (CAPPUN) independent of RACE (RACE)?
+Is attitude toward capitol punishment (CAPPUN) independent of race (RACE)?
 If not, then whose view differs from whom??
 
 # Methods
 
 <!--Decide on your methods:  use "variable analysis" or other appropriate descriptors.  Make sure to choose at least one graphical method and at least one numerical method. Discuss what data manipulations may be needed for example subsetting or other binning procedures and what sort of graphical displays and inferential tools will be used!-->
 
-We intend to get a small subset of data from the GSS data set. We only need RACE(RACE) and capital punishment(CAPPUN).
+We intend to get a small subset of data from the GSS data set. We only need race(RACE) and capital punishment(CAPPUN).
 
 # Results
 
@@ -144,4 +144,145 @@ There's definitely a difference between the white community and the black commun
 <!--Discussion and conclusion here.  If you found a relationship be sure to consider whether the relationship occurs because one of the variavbles causes the other, or whether they perhasps are related for some other reason.  Watch the chapter 6 videos from the GeorgeTown videos collection.!-->
 
 We looked at the bar plots for each race. The Black community was visually different from the white and other. We also ran fisherXY tests, and were able to confirm that the stance for the Black community is substantially different than for the white and other communities. 
+-----------------------------------------------------------------------------
+```{r include=FALSE,echo=FALSE}
+require(tidyverse)
+require(tigerstats)
+require(knitr)
+require(foreign)
+#GSS <-read.csv(file="GSScsv.csv",header=TRUE)
+GSS<- read.dta("GSS2018.dta")
+GSS <- droplevels(GSS)
+```
+
+# Introduction
+
+<!--In this section you explain what you are trying to show.  Where did the data come from?  What is the research or other question you are trying to answer?.  If you skimp in this section expect to be marked down in your grade. Paint a picture of the project a couple of paragraphs is expected!-->
+
+Is attitude toward capitol punishment (cappun) independent of race (race)?
+If not, then whose view differs from whom??
+
+# Methods
+
+<!--Decide on your methods:  use "variable analysis" or other appropriate descriptors.  Make sure to choose at least one graphical method and at least one numerical method. Discuss what data manipulations may be needed for example subsetting or other binning procedures and what sort of graphical displays and inferential tools will be used!-->
+
+We intend to get a small subset of data from the GSS2018.dta set. We only need race(race) and capital punishment(cappun).
+
+# Results
+
+<!--Divide this section into two sub-sections:  One for your descriptive  results and one for your inferential results.!-->
+
+## Descriptive Results
+
+### Graphical Descriptive Results
+
+<!--Graphical results here.  Make sure to show your code.  Provide appropriate labels for axes, giving units if possible, and provide a good title for the graph, too.  Use the graphical results to describe the patterns if any that exist in the data as focused toward the research question. Bottom line is to explain the features of the graph that are relevant to conforming or departing to what is expected by your null hypothesis !-->
+
+```{r}
+barchartGC(~race + cappun,data=GSS)
+barchartGC(~race + cappun,data=GSS, type="percent")
+
+```
+
+The most dramatic difference that we can see from this graph is within the black community, in which the majority actually opposes capital punishment, while the majorities for white and other communities respectively actually support it. 
+  
+### Numerical Descriptive Results
+
+<!--Numerical results go here. Use the numerical results to describe the patterns if any that exist in the data as focused toward the research question!-->
+
+```{r}
+table1 <- xtabs(~race + cappun, data=GSS)
+rowPerc(table1)
+colPerc(table1)
+```
+
+Approximately 68% of white people favor capital punishment compared to 32% who oppose it. For people of other races, about 56% favor capital punishment, and about 44% oppose it. For black people, about 46% favor capital punishment, and 54% oppose it. This supports our statement that the black community's stance on capital punishment is different from that of the white community and other communities. With a larger data set, the difference in percentages for black people and people of other races decreased.
+  
+## Inferential Results
+
+<!--State hypothesis clearly.  Make sure your discussion of the inferential test covers all the aspects that the test output produces, such as test statistic, p-value etc.  Make a decision about the null hypothesis, explain the assumptions on which the selected test/procedure was based, and why the chosen procedure satisfys the assumptions and is appropriate to answer the research question!-->
+
+```{r}
+chisq.test(table1)
+chisqtestGC(table1)
+fisher.test(table1)
+```
+
+```{r}
+fisherXY = function(x, y, confL = 0, printAll=FALSE){
+  # Inputs: 
+  #   x: factor variable, 2 levels
+  #   y: factor variable, n levels
+  # confL: confidence level, default = 0.95
+  #        print only those tables, results if p-value < (1-confL)
+  # printAll: overide the 'print only if p-value < (1-confL), and
+  #           print all tables and fisher test results
+  #
+  # Constraint:
+  #   x and y must be same length
+  #
+  # Outputs:
+  #   All 2x2 Fisher exact tests
+  
+  if(confL<0 || confL> 1){
+    print('error: confL must be between 0 and 1')
+    return(999)
+  }
+  
+  if(!is.factor(x)) x=as.factor(x)
+  if(!is.factor(y)) y=as.factor(y)
+  
+  fisherTable = as.matrix(table(x, y))
+  cat('\ncontingency table:\n')
+  print(fisherTable)
+  cat('\n***All 2X2 tests****\n\n')
+
+  # all 2x2 tests
+  levelsY = levels(y)
+  levelsX = levels(x)
+  
+  m = length(levelsX)
+  n = length(levelsY)
+  
+  confLevel = 0.95
+  if (confL !=0 ) confLevel=confL
+  
+  for (i in 1:(m-1))
+       for(j in ((i+1):m))
+          for (k in 1:(n-1))
+             for (l in ((k+1):n)) {
+                
+                 fisherIndexX = c(i,j)
+                 fisherIndexY = c(k,l)
+                 
+                 fTempTable = as.matrix(fisherTable[fisherIndexX,
+                                        fisherIndexY])
+                 
+                 fisherTest=fisher.test(fTempTable, conf.int = TRUE, 
+                              conf.level = confLevel)
+                 
+                 if((fisherTest$p.value < (1-confLevel) ) || printAll){
+                   
+                       print(c(levelsX[i], levelsX[j]))
+                       print(c(levelsY[k], levelsY[l]))
+                       print(fTempTable)
+                       print(fisherTest)
+                       cat('\n')
+                 }
+                 
+        }
+}
+
+```
+```{r}
+fisherXY(GSS$cappun,GSS$race)
+```
+There's definitely a difference between the white community and the black community on whether or not they support or oppose capital punishment. Between white and other, there is a difference on their sentiments on this issue. Between black and other, there is also a difference, which can be seen from the p-value of each respective test. Because we have a greater amount of data, the differences between the groups are not as dramatic.
+
+# Discussion and Conclusion
+
+<!--Discussion and conclusion here.  If you found a relationship be sure to consider whether the relationship occurs because one of the variavbles causes the other, or whether they perhasps are related for some other reason.  Watch the chapter 6 videos from the GeorgeTown videos collection.!-->
+
+We looked at a much larger data set in this section. We looked at the bar plots for each race. The Black community was visually different from the white and other. We also ran fisherXY tests, and were able to confirm that the stance for the Black community is substantially different than for the white and other communities. However, we were also able to see that there is a difference in the white and other sections, which we were unable to see before with a smaller data set. With a larger data set, we are able to make finer distinctions that we were unable to see before.
+  
   
