@@ -283,6 +283,6 @@ There's definitely a difference between the white community and the black commun
 
 <!--Discussion and conclusion here.  If you found a relationship be sure to consider whether the relationship occurs because one of the variavbles causes the other, or whether they perhasps are related for some other reason.  Watch the chapter 6 videos from the GeorgeTown videos collection.!-->
 
-We looked at a much larger data set in this section. We looked at the bar plots for each race. The Black community was visually different from the white and other. We also ran fisherXY tests, and were able to confirm that the stance for the Black community is substantially different than for the white and other communities. However, we were also able to see that there is a difference in the white and other sections, which we were unable to see before with a smaller data set. With a larger data set, we are able to make finer distinctions that we were unable to see before.
-  
+We looked at a much larger data set in this section. We looked at the bar plots for each race. The Black community was visually different from the white and other. We also ran fisher tests, and were able to confirm that the stance for the Black community is substantially different than for the white and other communities. However, we were also able to see that there is a difference in the white and other sections, which we were unable to see before with a smaller data set. With a larger data set, we are able to make finer distinctions that we were unable to see before.
+    
   
